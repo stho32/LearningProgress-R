@@ -1,0 +1,169 @@
+---
+title: "Stefans Lern-Dashboard"
+output: 
+  html_document: 
+    fig_width: 10
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen=999)
+
+library('rvest')
+library('readr')
+library('jsonlite')
+library('knitr')
+
+# Generelles Ablaufdatum von Daten, die manuellen Einfluss benötigen:
+vor6Monaten <- Sys.Date() - 30*6
+
+datacamp.profile <- "https://www.datacamp.com/profile/sthoffmann";
+treehouse.profile <- "https://teamtreehouse.com/stefanhoffmann.json";
+codeschool.profile <- "https://www.codeschool.com/users/stho";
+```
+
+## Überblick
+
+Diese Lernportale werden in diesem Überblick verwendet:
+
+  - TeamTreehouse (https://teamtreehouse.com, Videotraining, Programmieraufgaben, GitHub-Projekte & Prüfung durch die Trainer, sowie gegenseitige Code-Reviews der Schüler)
+  - CodeSchool (https://codeschool.com), Video & Programmieraufgaben
+  - Pluralsight (https://pluralsight.com, Videoschulungen, i.d.R. von führenden Entwicklern oder MVPs der entsprechenden Technologien), sehr gute Videoschulungen und Kenntis-Assessments, aber keine Programmieraufgaben
+  - **todo** Microsoft Virtual Academy 
+  - **todo** Microsoft Profil (Zertifikate etc.)
+  - **todo** https://www.edx.org (Free online courses from the world's best universities)
+  - **todo** github-Projekte, Beteiligungen an Open Source
+  - **todo** https://www.coursera.org/
+  - **todo** https://www.tiobe.com/tiobe-index/ Positionierung des Tech-Stacks innerhalb der generellen Popularität der Programmiersprachen
+
+## Aktuelle Zertifikate
+
+  - MCP Html, Javascript & CSS https://www.microsoft.com/en-us/learning/exam-70-480.aspx
+  
+  - **todo** Automatische Aktualisierung der Liste der Zertifikate sowie eine Liste der angestrebten Zertifikate
+
+## Prozentualer Fortschritt in den Lernportalen
+
+```{r scrape, echo=FALSE, warning=FALSE}
+
+datacamp_points <- html_session(datacamp.profile) %>%
+  html_node(".profile-header__stats") %>%
+  html_node(".stats-block__number") %>%
+  html_text() %>%
+  readr::parse_number()
+
+treehouse.points_detailed <- fromJSON(treehouse.profile)
+treehouse_points <- treehouse.points_detailed$points$total
+
+codeschool_points <- html_session(codeschool.profile) %>% 
+    html_node(".bucket-content .list-item strong") %>% 
+    html_text() %>% 
+    readr::parse_number()
+
+# github project count
+# microsoft mva
+# ... certs
+punkte <- c(datacamp_points, treehouse_points, codeschool_points)
+names(punkte) <- c("DataCamp", "TeamTreehouse", "CodeSchool")
+maximalpunktzahl <- c(50696, 131540, 72)
+
+prozentangabenVektor <- punkte / maximalpunktzahl * 100 
+names(prozentangabenVektor) <- paste(names(punkte))
+prozentangabenVektor = prozentangabenVektor[order(-prozentangabenVektor)]
+
+gesamt.uebersicht <- as.data.frame(prozentangabenVektor)
+colnames(gesamt.uebersicht)[1] <- "Lernfortschritt %"
+gesamt.uebersicht$`Lernfortschritt %` <- round(gesamt.uebersicht$`Lernfortschritt %`, digits = 2)
+
+kable(gesamt.uebersicht)
+```
+
+  - **todo** Einschätzung des Lernfortschrittes von Pluralsight anhand der mögl. interessanten zu gesehenen Videoschulungen
+
+## Einschätzung des Kenntnisstandes (Pluralsight)
+
+Pluralsight bietet Tests an, mit denen man seinen Kenntisstand einschätzen lassen kann. 
+Dabei bekommt man innerhalb einer bestimmten Zeit eine Reihe von Fragen gestellt. Die Antworten sind nach Schwierigkeitsgrad bewertet.
+
+Die Prozentangabe stellt dabei nicht die "Zensur" dar, sondern die relative Position des bewerteten Mitarbeiters im Kontext aller Pluralsight-Studenten, die sich über den Test haben bewerten lassen.
+
+Bewertet werden können ausschließlich Kenntnisbereiche, für die Pluralsight Lernpfade anbietet.
+
+Damit diese Werte nicht zu alt werden, ist eine Aktualisierung, d.h. ein erneuter Test, alle 6 Monate notwendig. Bei Beginn eines Pfades kann man 2* den Test direkt wiederholen. Danach ist die virtuelle Teilnahme an einigen Kursen notwendig, bevor der Test wieder wiederholt werden kann.
+
+```{r scrape pluralsight details, echo=FALSE, warning=FALSE}
+pluralsight_details <- fromJSON("https://app.pluralsight.com/profile/data/skillmeasurements/f68703d3-cf25-4d49-96ae-ef5f005e9d7e")
+pluralsight_details$dateCompleted <- as.Date(pluralsight_details$dateCompleted)
+pluralsight_details <- pluralsight_details[order(pluralsight_details$percentile),]
+colnames(pluralsight_details)[2] <- "Tech"
+colnames(pluralsight_details)[6] <- "Kenntnisstand %"
+colnames(pluralsight_details)[8] <- "Zuletzt gemessen am"
+
+pluralsight_iq = pluralsight_details[c("Tech", "Kenntnisstand %")]
+
+pluralsight_details$`Kenntnisstand %` <- round(pluralsight_details$`Kenntnisstand %`, digits=2)
+
+prozentangabenVektor <- pluralsight_iq$`Kenntnisstand %`
+names(prozentangabenVektor) <- pluralsight_iq$Tech
+
+aktualisierungNotwendig <- c()
+aktualisierungNotwendig <- ifelse(pluralsight_details$`Zuletzt gemessen am` < vor6Monaten, "Aktualisierung notwendig!", "")
+
+pluralsight_details <- cbind(pluralsight_details, aktualisierungNotwendig)
+colnames(pluralsight_details)[9] <- "Aktualisierung erforderlich?"
+pluralsight_details$`Zuletzt gemessen am` <- format(pluralsight_details$`Zuletzt gemessen am`, "%d.%m.%Y")
+kable(pluralsight_details[c("Tech", "Kenntnisstand %", "Zuletzt gemessen am", "Aktualisierung erforderlich?")], row.names = FALSE)
+```
+
+## Lernfortschritt Team Treehouse
+
+Treehouse bietet eine API an, mit der wir die Detailpunkte für unsere wichtigen Kategorien abrufen können. 
+Obwohl Treehouse seine maximalen Punktzahlen ständig anpasst, weil sich die Lerninhalte ständig ändern, 
+können wir Fortschritts-Prozente angeben, in dem wir uns an den Kategorien-Höchstzahlen orientieren, die 
+wir über https://teamtreehouse.com/community/leaderboards abrufen können.
+
+```{r Treehouse Fortschritt in %, echo=FALSE}
+treehouse.maximalePunkte.letztesUpdate <- as.Date("2018-02-03");
+if ( treehouse.maximalePunkte.letztesUpdate <= vor6Monaten ) {
+  print("Bitte besuche https://teamtreehouse.com/community/leaderboards und aktualisiere die maximalen Punktezahlen pro Kategorie anhand der Leader der einzelnen Kategorien!")
+}
+treehouse.wichtigeKategorien <- c(
+  "HTML", "CSS", "Design", "JavaScript", "PHP", "WordPress", "Development.Tools",
+  "C.", "Databases", "Data.Analysis", "APIs", "Security", "Quality.Assurance")
+
+treehouse.maximalePunkte <- list(
+  HTML = 6933,
+  CSS = 11423,
+  Design = 5033,
+  JavaScript = 29958,
+  PHP = 8166,
+  WordPress = 8192,
+  Development.Tools = 4649,
+  C. = 12527, # C#
+  Databases = 5728,
+  Data.Analysis = 908,
+  APIs = 756,
+  Security = 852,
+  Quality.Assurance = 221
+)
+
+treehouse.gefiltert <- t(as.data.frame(treehouse.points_detailed$points))
+treehouse.gefiltert <- subset(treehouse.gefiltert, row.names(treehouse.gefiltert) %in% treehouse.wichtigeKategorien)
+
+treehouse.gefiltert <- cbind(treehouse.gefiltert, treehouse.maximalePunkte)
+treehouse.gefiltert <- cbind(treehouse.gefiltert, round(unlist(treehouse.gefiltert[,1]) / unlist(treehouse.gefiltert[,2]) * 100, digits = 2))
+
+colnames(treehouse.gefiltert)[1] <- "Meine Punkte"
+colnames(treehouse.gefiltert)[2] <- "Max. Punkte"
+colnames(treehouse.gefiltert)[3] <- "Fortschritt %"
+
+rownames(treehouse.gefiltert)[which(rownames(treehouse.gefiltert) == "C.")] <- "C#"
+
+kable(treehouse.gefiltert, align=c(rep('r',times=3)))
+```
+
+Letzte Aktualisierung der maximalen Punkte war am **`r format(treehouse.maximalePunkte.letztesUpdate, format="%d.%m.%Y")` ** .
+
+
+

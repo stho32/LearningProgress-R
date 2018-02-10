@@ -1,5 +1,5 @@
 ---
-title: "Stefans Lern-Dashboard"
+title: "Stefans Learning-Dashboard"
 output: 
   html_document: 
     fig_width: 10
@@ -9,6 +9,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 options(scipen=999)
+options(stringsAsFactors=FALSE)
 
 library('rvest')
 library('readr')
@@ -21,31 +22,13 @@ vor6Monaten <- Sys.Date() - 30*6
 datacamp.profile <- "https://www.datacamp.com/profile/sthoffmann";
 treehouse.profile <- "https://teamtreehouse.com/stefanhoffmann.json";
 codeschool.profile <- "https://www.codeschool.com/users/stho";
-```
+pluralsight_details <- fromJSON("https://app.pluralsight.com/profile/data/skillmeasurements/f68703d3-cf25-4d49-96ae-ef5f005e9d7e")
 
-## Überblick
-
-Diese Lernportale werden in diesem Überblick verwendet:
-
-  - TeamTreehouse (https://teamtreehouse.com, Videotraining, Programmieraufgaben, GitHub-Projekte & Prüfung durch die Trainer, sowie gegenseitige Code-Reviews der Schüler)
-  - CodeSchool (https://codeschool.com), Video & Programmieraufgaben
-  - Pluralsight (https://pluralsight.com, Videoschulungen, i.d.R. von führenden Entwicklern oder MVPs der entsprechenden Technologien), sehr gute Videoschulungen und Kenntis-Assessments, aber keine Programmieraufgaben
-  - **todo** Microsoft Virtual Academy 
-  - **todo** Microsoft Profil (Zertifikate etc.)
-  - **todo** https://www.edx.org (Free online courses from the world's best universities)
-  - **todo** github-Projekte, Beteiligungen an Open Source
-  - **todo** https://www.coursera.org/
-  - **todo** https://www.tiobe.com/tiobe-index/ Positionierung des Tech-Stacks innerhalb der generellen Popularität der Programmiersprachen
-
-## Aktuelle Zertifikate
-
-  - MCP Html, Javascript & CSS https://www.microsoft.com/en-us/learning/exam-70-480.aspx
-  
-  - **todo** Automatische Aktualisierung der Liste der Zertifikate sowie eine Liste der angestrebten Zertifikate
-
-## Prozentualer Fortschritt in den Lernportalen
-
-```{r scrape, echo=FALSE, warning=FALSE}
+pluralsight_details$dateCompleted <- as.Date(pluralsight_details$dateCompleted)
+pluralsight_details <- pluralsight_details[order(pluralsight_details$percentile),]
+colnames(pluralsight_details)[2] <- "Tech"
+colnames(pluralsight_details)[6] <- "IQ"
+colnames(pluralsight_details)[8] <- "Last measured"
 
 datacamp_points <- html_session(datacamp.profile) %>%
   html_node(".profile-header__stats") %>%
@@ -72,16 +55,101 @@ prozentangabenVektor <- punkte / maximalpunktzahl * 100
 names(prozentangabenVektor) <- paste(names(punkte))
 prozentangabenVektor = prozentangabenVektor[order(-prozentangabenVektor)]
 
-gesamt.uebersicht <- as.data.frame(prozentangabenVektor)
-colnames(gesamt.uebersicht)[1] <- "Lernfortschritt %"
-gesamt.uebersicht$`Lernfortschritt %` <- round(gesamt.uebersicht$`Lernfortschritt %`, digits = 2)
+overviewPerPortal <- as.data.frame(prozentangabenVektor)
+colnames(overviewPerPortal)[1] <- "Learning progress %"
+overviewPerPortal$`Learning progress %` <- round(overviewPerPortal$`Learning progress %`, digits = 2)
 
-kable(gesamt.uebersicht)
+overviewPerPortal <- data.frame(
+  portal = rownames(overviewPerPortal),
+  `Learning progress %` = overviewPerPortal
+)
+colnames(overviewPerPortal) <- c("portal", "Learning progress %")
+rownames(overviewPerPortal) <- NULL
+
 ```
 
-  - **todo** Einschätzung des Lernfortschrittes von Pluralsight anhand der mögl. interessanten zu gesehenen Videoschulungen
+This report as been last updated at **`r format(Sys.time(), format="%Y-%m-%d %H:%m")`**.
 
-## Einschätzung des Kenntnisstandes (Pluralsight)
+## Tech Stack
+
+Target of my tech stack is the development of lasting and enduring web based business applications.
+
+My stack is mainly targeted to Windows development, although going cross platform is possible in the future. My employer is a Microsoft partner and my employers environment is Windows, too, thus targeting Linux or Mac primarily would make no sense. 
+
+While I always keep my mind open to new technologies and libraries I try keeping my professional stuff together unless I see a big advantage in something.
+
+My stack is split into different categories: 
+  - important (A)
+  - less important (B)
+  - present, but seldomly used (C)
+
+**The Stack** 
+
+- **HTML, CSS + Javascript (A)**, needed to build fancy web UIs
+- **ASP.Net (webforms legacy and mvc) (A)**, backend web server technology
+- **C# (A)**, productive, compiled, good support for unit testing, focus on business
+- **MS SQL Server (A)**, as database technology for this part of the stack
+- **Powershell (A/B)** becoming more and more important, as batch automation language and as a language that is useful for all kinds of administrative tasks
+- **R (A/B)** as a language that helps a lot when doing data analysis, pattern matching, plotting, import/export... with SEO reporting and a lot of other stuff
+
+- **PHP (B)**, for applications that need to be hosted as websites on some linux box I do not have much control over
+- **MySQL (B)**, as database for PHP applications
+
+- **C++ (C)**, for the seldom moments where I have a need to talk directly to the system or performance is so important that everything else does not count.
+
+## Knowledge in those technologies
+
+```{r, echo=FALSE, warning=FALSE}
+
+overviewPerTech <- data.frame(list(
+  tech = character(),
+  certificate = character(),
+  pluralsight_score_in_percent = numeric(),
+  codeschool_progress = numeric(),
+  treehouse_progress = numeric(),
+  dataCamp_progress = numeric()
+))
+
+techinfo <- function (name, certificate, pluralsightTopics, dataCamp = NA) {
+  pluralsight_score <- NA
+  if (length(pluralsightTopics) > 0) {
+    pluralsight_score <- mean(pluralsight_details[pluralsight_details$id %in% pluralsightTopics,]$score)
+    pluralsight_score <- round(pluralsight_score / 300 * 100, 2)
+  }
+  
+  return(
+    list(
+      tech = name,
+      certificate = certificate,
+      pluralsight_score_in_percent = pluralsight_score,
+      codeschool_progress = NA,
+      treehouse_progress = NA,
+      dataCamp_progress = round(dataCamp, digits = 2)
+    ))
+}
+
+overviewPerTech<-rbind(overviewPerTech, techinfo("HTML, CSS, JS", "MS (70-480, 2016)", c("javascript", "jquery", "css", "html5")))
+overviewPerTech<-rbind(overviewPerTech, techinfo("ASP.Net", "-", c("aspnet-mvc-5")))
+overviewPerTech<-rbind(overviewPerTech, techinfo("C#", "-", c("c-sharp")))
+overviewPerTech<-rbind(overviewPerTech, techinfo("MS SQL Server", "-", c()))
+overviewPerTech<-rbind(overviewPerTech, techinfo("Powershell", "-", c()))
+overviewPerTech<-rbind(overviewPerTech, techinfo("R", "-", c(), dataCamp = overviewPerPortal[overviewPerPortal$portal == "DataCamp",]$`Learning progress %`))
+overviewPerTech<-rbind(overviewPerTech, techinfo("PHP", "-", c()))
+overviewPerTech<-rbind(overviewPerTech, techinfo("MySQL", "-", c()))
+overviewPerTech<-rbind(overviewPerTech, techinfo("C++", "-", c()))
+
+kable(overviewPerTech)
+```
+
+## Progress by learning institution / portal
+
+```{r scrape, echo=FALSE, warning=FALSE}
+kable(overviewPerPortal)
+```
+
+
+
+## Knowledge assessment by Pluralsight
 
 Pluralsight bietet Tests an, mit denen man seinen Kenntisstand einschätzen lassen kann. 
 Dabei bekommt man innerhalb einer bestimmten Zeit eine Reihe von Fragen gestellt. Die Antworten sind nach Schwierigkeitsgrad bewertet.
@@ -93,40 +161,32 @@ Bewertet werden können ausschließlich Kenntnisbereiche, für die Pluralsight L
 Damit diese Werte nicht zu alt werden, ist eine Aktualisierung, d.h. ein erneuter Test, alle 6 Monate notwendig. Bei Beginn eines Pfades kann man 2* den Test direkt wiederholen. Danach ist die virtuelle Teilnahme an einigen Kursen notwendig, bevor der Test wieder wiederholt werden kann.
 
 ```{r scrape pluralsight details, echo=FALSE, warning=FALSE}
-pluralsight_details <- fromJSON("https://app.pluralsight.com/profile/data/skillmeasurements/f68703d3-cf25-4d49-96ae-ef5f005e9d7e")
-pluralsight_details$dateCompleted <- as.Date(pluralsight_details$dateCompleted)
-pluralsight_details <- pluralsight_details[order(pluralsight_details$percentile),]
-colnames(pluralsight_details)[2] <- "Tech"
-colnames(pluralsight_details)[6] <- "Kenntnisstand %"
-colnames(pluralsight_details)[8] <- "Zuletzt gemessen am"
 
-pluralsight_iq = pluralsight_details[c("Tech", "Kenntnisstand %")]
+pluralsight_iq = pluralsight_details[c("Tech", "IQ")]
 
-pluralsight_details$`Kenntnisstand %` <- round(pluralsight_details$`Kenntnisstand %`, digits=2)
+pluralsight_details$`IQ` <- round(pluralsight_details$`IQ`, digits=2)
 
-prozentangabenVektor <- pluralsight_iq$`Kenntnisstand %`
+prozentangabenVektor <- pluralsight_iq$`IQ`
 names(prozentangabenVektor) <- pluralsight_iq$Tech
 
 aktualisierungNotwendig <- c()
-aktualisierungNotwendig <- ifelse(pluralsight_details$`Zuletzt gemessen am` < vor6Monaten, "Aktualisierung notwendig!", "")
+aktualisierungNotwendig <- ifelse(pluralsight_details$`Last measured` < vor6Monaten, "Update neccessary!", "")
 
 pluralsight_details <- cbind(pluralsight_details, aktualisierungNotwendig)
-colnames(pluralsight_details)[9] <- "Aktualisierung erforderlich?"
-pluralsight_details$`Zuletzt gemessen am` <- format(pluralsight_details$`Zuletzt gemessen am`, "%d.%m.%Y")
-kable(pluralsight_details[c("Tech", "Kenntnisstand %", "Zuletzt gemessen am", "Aktualisierung erforderlich?")], row.names = FALSE)
+colnames(pluralsight_details)[9] <- "Update neccessary?"
+pluralsight_details$`Last measured` <- format(pluralsight_details$`Last measured`, "%d.%m.%Y")
+kable(pluralsight_details[c("Tech", "IQ", "Last measured", "Update neccessary?")], row.names = FALSE)
 ```
 
-## Lernfortschritt Team Treehouse
+## Treehouse progress details 
 
-Treehouse bietet eine API an, mit der wir die Detailpunkte für unsere wichtigen Kategorien abrufen können. 
-Obwohl Treehouse seine maximalen Punktzahlen ständig anpasst, weil sich die Lerninhalte ständig ändern, 
-können wir Fortschritts-Prozente angeben, in dem wir uns an den Kategorien-Höchstzahlen orientieren, die 
-wir über https://teamtreehouse.com/community/leaderboards abrufen können.
+Treehouse offers an API, using the same we get detailed points for every category. 
+Although Treehouse changes its maximum points all the time, because the courses change all the time, we are able to calculate a progress using the point counts of the best students in a specific area. We get those from https://teamtreehouse.com/community/leaderboards . Note: you'll need to manually update the maximum points every 6 months, the report will remind you.
 
 ```{r Treehouse Fortschritt in %, echo=FALSE}
 treehouse.maximalePunkte.letztesUpdate <- as.Date("2018-02-03");
 if ( treehouse.maximalePunkte.letztesUpdate <= vor6Monaten ) {
-  print("Bitte besuche https://teamtreehouse.com/community/leaderboards und aktualisiere die maximalen Punktezahlen pro Kategorie anhand der Leader der einzelnen Kategorien!")
+  print("Please visit https://teamtreehouse.com/community/leaderboards and update the maximum points per category using the points of the current leaders per category!")
 }
 treehouse.wichtigeKategorien <- c(
   "HTML", "CSS", "Design", "JavaScript", "PHP", "WordPress", "Development.Tools",
@@ -154,16 +214,31 @@ treehouse.gefiltert <- subset(treehouse.gefiltert, row.names(treehouse.gefiltert
 treehouse.gefiltert <- cbind(treehouse.gefiltert, treehouse.maximalePunkte)
 treehouse.gefiltert <- cbind(treehouse.gefiltert, round(unlist(treehouse.gefiltert[,1]) / unlist(treehouse.gefiltert[,2]) * 100, digits = 2))
 
-colnames(treehouse.gefiltert)[1] <- "Meine Punkte"
-colnames(treehouse.gefiltert)[2] <- "Max. Punkte"
-colnames(treehouse.gefiltert)[3] <- "Fortschritt %"
+colnames(treehouse.gefiltert)[1] <- "My Points"
+colnames(treehouse.gefiltert)[2] <- "Max. Points"
+colnames(treehouse.gefiltert)[3] <- "Progress %"
 
 rownames(treehouse.gefiltert)[which(rownames(treehouse.gefiltert) == "C.")] <- "C#"
 
 kable(treehouse.gefiltert, align=c(rep('r',times=3)))
 ```
 
-Letzte Aktualisierung der maximalen Punkte war am **`r format(treehouse.maximalePunkte.letztesUpdate, format="%d.%m.%Y")` ** .
+Last update of the maximum points has been on **`r format(treehouse.maximalePunkte.letztesUpdate, format="%Y-%m-%d")` ** .
 
 
+## Features & Todo for this report
+
+Diese Lernportale werden in diesem Überblick verwendet:
+
+  - TeamTreehouse (https://teamtreehouse.com, Videotraining, Programmieraufgaben, GitHub-Projekte & Prüfung durch die Trainer, sowie gegenseitige Code-Reviews der Schüler)
+  - CodeSchool (https://codeschool.com), Video & Programmieraufgaben
+  - Pluralsight (https://pluralsight.com, Videoschulungen, i.d.R. von führenden Entwicklern oder MVPs der entsprechenden Technologien), sehr gute Videoschulungen und Kenntis-Assessments, aber keine Programmieraufgaben
+  - **todo** Microsoft Virtual Academy 
+  - **todo** Microsoft Profil (Zertifikate etc.)
+  - **todo** https://www.edx.org (Free online courses from the world's best universities)
+  - **todo** github-Projekte, Beteiligungen an Open Source
+  - **todo** https://www.coursera.org/
+  - **todo** https://www.tiobe.com/tiobe-index/ Positionierung des Tech-Stacks innerhalb der generellen Popularität der Programmiersprachen
+  - **todo** Einschätzung des Lernfortschrittes von Pluralsight anhand der mögl. interessanten zu gesehenen Videoschulungen
+  - **todo** Automatische Aktualisierung der Liste der Zertifikate sowie eine Liste der angestrebten Zertifikate
 

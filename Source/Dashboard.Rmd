@@ -10,6 +10,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 options(scipen=999)
 options(stringsAsFactors=FALSE)
+options(knitr.kable.NA = '')
 
 library('rvest')
 library('readr')
@@ -132,13 +133,13 @@ overviewPerTech<-rbind(overviewPerTech, techinfo("HTML, CSS, JS", "MS (70-480, 2
 overviewPerTech<-rbind(overviewPerTech, techinfo("ASP.Net", "-", c("aspnet-mvc-5")))
 overviewPerTech<-rbind(overviewPerTech, techinfo("C#", "-", c("c-sharp")))
 overviewPerTech<-rbind(overviewPerTech, techinfo("MS SQL Server", "-", c()))
-overviewPerTech<-rbind(overviewPerTech, techinfo("Powershell", "-", c()))
+overviewPerTech<-rbind(overviewPerTech, techinfo("Powershell", "-", c("powershell")))
 overviewPerTech<-rbind(overviewPerTech, techinfo("R", "-", c(), dataCamp = overviewPerPortal[overviewPerPortal$portal == "DataCamp",]$`Learning progress %`))
 overviewPerTech<-rbind(overviewPerTech, techinfo("PHP", "-", c()))
 overviewPerTech<-rbind(overviewPerTech, techinfo("MySQL", "-", c()))
 overviewPerTech<-rbind(overviewPerTech, techinfo("C++", "-", c()))
 
-kable(overviewPerTech)
+kable(overviewPerTech, col.names = c("tech", "certificate", "Pluralsight score in %", "CodeSchool Progress %", "Treehouse Progress %", "DataCamp Progress %"))
 ```
 
 ## Progress by learning institution / portal

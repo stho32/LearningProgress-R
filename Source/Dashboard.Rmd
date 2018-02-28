@@ -17,8 +17,12 @@ library('readr')
 library('jsonlite')
 library('knitr')
 
+source("./Config.R")
 source("./CodeSchool.R")
-codeschool <- CodeSchool.GetUserInformation("stho")
+
+codeschool <- CodeSchool.GetUserInformation(codeschool.username)
+
+### --- DO FURTHER REFACTORING STARTING HERE ----
 
 # Generelles Ablaufdatum von Daten, die manuellen Einfluss benötigen:
 vor6Monaten <- Sys.Date() - 30*6

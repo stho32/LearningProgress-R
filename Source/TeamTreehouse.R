@@ -9,3 +9,5 @@ library('readr')
 library('jsonlite')
 library('stringr')
 library('httr')
+
+source("./Config.R")

@@ -18,6 +18,7 @@ library('jsonlite')
 library('knitr')
 
 source("./CodeSchool.R")
+codeschool <- CodeSchool.GetUserInformation("stho")
 
 # Generelles Ablaufdatum von Daten, die manuellen Einfluss benötigen:
 vor6Monaten <- Sys.Date() - 30*6
@@ -86,13 +87,20 @@ My stack is split into different categories:
   - less important (B)
   - present, but seldomly used (C)
 
+General direction: 
+  - use the plain language preferred (avoid transpilers, generators and pre- and post processors unless you have a strong advantage from them)
+  - when possible use unit tests to secure the code
+  - prefer readable sourcecode and good names 
+  - Only optimise performance if there is a concrete bottle neck and you are forced to do so. In any other case: 
+  - write good comments
+
 **The Stack** 
 
-- **HTML, CSS + Javascript (A)**, needed to build fancy web UIs
-- **ASP.Net (webforms legacy and mvc) (A)**, backend web server technology
-- **C# (A)**, productive, compiled, good support for unit testing, focus on business
-- **MS SQL Server (A)**, as database technology for this part of the stack
-- **Powershell (A/B)** becoming more and more important, as batch automation language and as a language that is useful for all kinds of administrative tasks
+- **HTML, CSS + Javascript (A)**, needed to build fancy web UIs (active: ES5, upcoming: ES6 and ES7)
+- **ASP.Net (webforms legacy and mvc) (A)**, backend web server technology (active: MVC5, upcoming: core or .net MVC6?)
+- **C# (A)**, productive, compiled, good support for unit testing, focus on business (active: C#6, upcoming: C#7)
+- **MS SQL Server (A)**, as database technology for this part of the stack (active: 2012, upcoming: 2016? 2018?)
+- **Powershell (A/B)** becoming more and more important, as batch automation language and as a language that is useful for all kinds of administrative tasks (active: 5, upcoming: core? 6?)
 - **R (A/B)** as a language that helps a lot when doing data analysis, pattern matching, plotting, import/export... with SEO reporting and a lot of other stuff
 
 - **PHP (B)**, for applications that need to be hosted as websites on some linux box I do not have much control over
@@ -131,19 +139,19 @@ techinfo <- function (name, certificate, pluralsightTopics, codeschoolPercent = 
     ))
 }
 
-overviewPerTech<-rbind(overviewPerTech, techinfo("HTML, CSS, JS", "MS (70-480, 2016)", c("javascript", "jquery", "css", "html5"), codeschoolPercent = mean( c(codeschool.htmlCssPercent, codeschool.javascriptPercent))))
+overviewPerTech<-rbind(overviewPerTech, techinfo("HTML, CSS, JS", "MS (70-480, 2016)", c("javascript", "jquery", "css", "html5"), codeschoolPercent = mean( c(codeschool$htmlCssPercent, codeschool$javascriptPercent))))
 overviewPerTech<-rbind(overviewPerTech, techinfo("ASP.Net", "-", c("aspnet-mvc-5")))
 
-overviewPerTech<-rbind(overviewPerTech, techinfo("C#", "-", c("c-sharp"), codeschoolPercent = codeschool.netPercent))
+overviewPerTech<-rbind(overviewPerTech, techinfo("C#", "-", c("c-sharp"), codeschoolPercent = codeschool$netPercent))
 
-overviewPerTech<-rbind(overviewPerTech, techinfo("MS SQL Server", "-", c(), codeschoolPercent = codeschool.databasePercent))
+overviewPerTech<-rbind(overviewPerTech, techinfo("MS SQL Server", "-", c(), codeschoolPercent = codeschool$databasePercent))
 
 overviewPerTech<-rbind(overviewPerTech, techinfo("Powershell", "-", c("powershell")))
-overviewPerTech<-rbind(overviewPerTech, techinfo("R", "-", c(), dataCamp = overviewPerPortal[overviewPerPortal$portal == "DataCamp",]$`Learning progress %`, codeschoolPercent =   codeschool.rPercent))
+overviewPerTech<-rbind(overviewPerTech, techinfo("R", "-", c(), dataCamp = overviewPerPortal[overviewPerPortal$portal == "DataCamp",]$`Learning progress %`, codeschoolPercent =   codeschool$rPercent))
 
-overviewPerTech<-rbind(overviewPerTech, techinfo("PHP", "-", c(), codeschoolPercent = codeschool.phpPercent))
-overviewPerTech<-rbind(overviewPerTech, techinfo("MySQL", "-", c(), codeschoolPercent = codeschool.databasePercent))
-overviewPerTech<-rbind(overviewPerTech, techinfo("C++", "-", c()))
+overviewPerTech<-rbind(overviewPerTech, techinfo("PHP", "-", c(), codeschoolPercent = codeschool$phpPercent))
+overviewPerTech<-rbind(overviewPerTech, techinfo("MySQL", "-", c("mysql"), codeschoolPercent = codeschool$databasePercent))
+overviewPerTech<-rbind(overviewPerTech, techinfo("C++", "-", c("c-plus-plus")))
 
 kable(overviewPerTech, col.names = c("tech", "certificate", "Pluralsight score in %", "CodeSchool Progress %", "Treehouse Progress %", "DataCamp Progress %"))
 ```
@@ -154,24 +162,28 @@ I use certain tools to accomplish my goals.
 Git e.g.
 Where is my learning progress here?
 
+  - Git
+  - Visual Studio 
+  - Rider
+  - Resharper
+  - nodejs / npm
+  - msbuild
+  - nuget
+  - PHPStorm
+
 ## Progress by learning institution / portal
 
 ```{r scrape, echo=FALSE, warning=FALSE}
 kable(overviewPerPortal)
 ```
 
+## Knowledge comparison with other developers by Pluralsight
 
+Pluralsight offers tests which you can use to get a guess on how good your knowledge is in a specific area. In a specific time frame you are asked a sequence of questions. Using some advanced techniques (e.g. the level of difficulty of a question is determined by the amount of people who know the right answer relative to the ones who dont; the speed of your answer playes a role etc.) this results in a number of points and a percent value.
 
-## Knowledge assessment by Pluralsight
+The percent value is not a "mark", but the relative position of the assessed one in the context of all pluralsight students that have taken the test. You may only know 50% of an area and still know more than 90% of your fellow students. The 90% in this example are called the IQ.
 
-Pluralsight bietet Tests an, mit denen man seinen Kenntisstand einschätzen lassen kann. 
-Dabei bekommt man innerhalb einer bestimmten Zeit eine Reihe von Fragen gestellt. Die Antworten sind nach Schwierigkeitsgrad bewertet.
-
-Die Prozentangabe stellt dabei nicht die "Zensur" dar, sondern die relative Position des bewerteten Mitarbeiters im Kontext aller Pluralsight-Studenten, die sich über den Test haben bewerten lassen.
-
-Bewertet werden können ausschließlich Kenntnisbereiche, für die Pluralsight Lernpfade anbietet.
-
-Damit diese Werte nicht zu alt werden, ist eine Aktualisierung, d.h. ein erneuter Test, alle 6 Monate notwendig. Bei Beginn eines Pfades kann man 2* den Test direkt wiederholen. Danach ist die virtuelle Teilnahme an einigen Kursen notwendig, bevor der Test wieder wiederholt werden kann.
+To keep the numbers up to date I added a rule, that I have to retake a once-taken test every 6 months. To improve the score, and later, to be able to take the test, one has to take part in courses, which adds up hopefully and keeps me in the loop.
 
 ```{r scrape pluralsight details, echo=FALSE, warning=FALSE}
 

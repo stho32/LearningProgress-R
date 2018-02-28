@@ -4,13 +4,23 @@
 # Loads a lot of stats for a given public user
 #
 
-options(stringsAsFactors = TRUE)
-
 library('rvest')
 library('readr')
 library('jsonlite')
 library('stringr')
 library('httr')
+
+source("./Config.R")
+
+CodeSchool.GetCoursesForPath <- function(path) {
+  library(httr)
+  library(stringr)
+  
+  url <- "https://www.codeschool.com/learn/html-css"
+  result <- content(httr::GET(url), "text")
+  links <- str_match_all(result, pattern = "<a href=\"/courses/(.+)\">")[[1]][,2]
+  return(links)
+}
 
 CodeSchool.GetUserInformation <- function (username) {
   # Basic information about the user
@@ -69,4 +79,4 @@ CodeSchool.GetUserInformation <- function (username) {
   return(codeschool)
 }
 
-CodeSchool.GetUserInformation("stho")
+#codeschool <- CodeSchool.GetUserInformation("stho")

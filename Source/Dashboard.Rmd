@@ -19,6 +19,7 @@ library('knitr')
 
 source("./Config.R")
 source("./CodeSchool.R")
+source("./TeamTreehouse.R")
 
 codeschool <- CodeSchool.GetUserInformation(codeschool.username)
 
@@ -26,11 +27,6 @@ codeschool <- CodeSchool.GetUserInformation(codeschool.username)
 
 # Generelles Ablaufdatum von Daten, die manuellen Einfluss benötigen:
 vor6Monaten <- Sys.Date() - 30*6
-
-datacamp.profile <- "https://www.datacamp.com/profile/sthoffmann";
-treehouse.profile <- "https://teamtreehouse.com/stefanhoffmann.json";
-codeschool.profile <- "https://www.codeschool.com/users/stho";
-pluralsight_details <- fromJSON("https://app.pluralsight.com/profile/data/skillmeasurements/f68703d3-cf25-4d49-96ae-ef5f005e9d7e")
 
 pluralsight_details$dateCompleted <- as.Date(pluralsight_details$dateCompleted)
 pluralsight_details <- pluralsight_details[order(pluralsight_details$percentile),]
@@ -87,11 +83,13 @@ My stack is mainly targeted to Windows development, although going cross platfor
 While I always keep my mind open to new technologies and libraries I try keeping my professional stuff together unless I see a big advantage in something.
 
 My stack is split into different categories: 
+
   - important (A)
   - less important (B)
   - present, but seldomly used (C)
 
 General direction: 
+
   - use the plain language preferred (avoid transpilers, generators and pre- and post processors unless you have a strong advantage from them)
   - when possible use unit tests to secure the code
   - prefer readable sourcecode and good names 
@@ -100,11 +98,11 @@ General direction:
 
 **The Stack** 
 
-- **HTML, CSS + Javascript (A)**, needed to build fancy web UIs (active: ES5, upcoming: ES6 and ES7)
-- **ASP.Net (webforms legacy and mvc) (A)**, backend web server technology (active: MVC5, upcoming: core or .net MVC6?)
-- **C# (A)**, productive, compiled, good support for unit testing, focus on business (active: C#6, upcoming: C#7)
-- **MS SQL Server (A)**, as database technology for this part of the stack (active: 2012, upcoming: 2016? 2018?)
-- **Powershell (A/B)** becoming more and more important, as batch automation language and as a language that is useful for all kinds of administrative tasks (active: 5, upcoming: core? 6?)
+- **HTML, CSS + Javascript (A)**, needed to build fancy web UIs *(active: ES5, upcoming: ES6 and ES7)*
+- **ASP.Net (webforms legacy and mvc) (A)**, backend web server technology *(active: MVC5, upcoming: core or .net MVC6?)*
+- **C# (A)**, productive, compiled, good support for unit testing, focus on business *(active: C#6, upcoming: C#7)*
+- **MS SQL Server (A)**, as database technology for this part of the stack *(active: 2012, upcoming: 2016? 2018?)*
+- **Powershell (A/B)** becoming more and more important, as batch automation language and as a language that is useful for all kinds of administrative tasks *(active: 5, upcoming: core? 6?)*
 - **R (A/B)** as a language that helps a lot when doing data analysis, pattern matching, plotting, import/export... with SEO reporting and a lot of other stuff
 
 - **PHP (B)**, for applications that need to be hosted as websites on some linux box I do not have much control over

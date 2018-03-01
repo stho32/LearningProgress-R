@@ -20,13 +20,11 @@ library('knitr')
 source("./Config.R")
 source("./CodeSchool.R")
 source("./TeamTreehouse.R")
+source("./Pluralsight.R")
 
 codeschool <- CodeSchool.GetUserInformation(codeschool.username)
 
 ### --- DO FURTHER REFACTORING STARTING HERE ----
-
-# Generelles Ablaufdatum von Daten, die manuellen Einfluss benötigen:
-vor6Monaten <- Sys.Date() - 30*6
 
 pluralsight_details$dateCompleted <- as.Date(pluralsight_details$dateCompleted)
 pluralsight_details <- pluralsight_details[order(pluralsight_details$percentile),]
@@ -197,7 +195,7 @@ prozentangabenVektor <- pluralsight_iq$`IQ`
 names(prozentangabenVektor) <- pluralsight_iq$Tech
 
 aktualisierungNotwendig <- c()
-aktualisierungNotwendig <- ifelse(pluralsight_details$`Last measured` < vor6Monaten, "Update neccessary!", "")
+aktualisierungNotwendig <- ifelse(pluralsight_details$`Last measured` < overagedDate, "Update neccessary!", "")
 
 pluralsight_details <- cbind(pluralsight_details, aktualisierungNotwendig)
 colnames(pluralsight_details)[9] <- "Update neccessary?"
@@ -212,7 +210,7 @@ Although Treehouse changes its maximum points all the time, because the courses 
 
 ```{r Treehouse Fortschritt in %, echo=FALSE}
 treehouse.maximalePunkte.letztesUpdate <- as.Date("2018-02-03");
-if ( treehouse.maximalePunkte.letztesUpdate <= vor6Monaten ) {
+if ( treehouse.maximalePunkte.letztesUpdate <= overagedDate ) {
   print("Please visit https://teamtreehouse.com/community/leaderboards and update the maximum points per category using the points of the current leaders per category!")
 }
 treehouse.wichtigeKategorien <- c(

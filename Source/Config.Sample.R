@@ -11,4 +11,7 @@ treehouse.profile <- "https://teamtreehouse.com/stefanhoffmann.json";
 codeschool.username <- "stho";
 codeschool.profile <- paste("https://www.codeschool.com/users/", codeschool.username, sep="");
 
-pluralsight_details <- fromJSON("https://app.pluralsight.com/profile/data/skillmeasurements/f68703d3-cf25-4d49-96ae-ef5f005e9d7e")
+pluralsight.skillmeasurementsUrl = "https://app.pluralsight.com/profile/data/skillmeasurements/f68703d3-cf25-4d49-96ae-ef5f005e9d7e";
+
+# Skill measurements taken older than this need renewal
+overagedDate <- Sys.Date() - 30*6

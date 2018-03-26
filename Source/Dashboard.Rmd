@@ -8,65 +8,13 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-options(scipen=999)
-options(stringsAsFactors=FALSE)
-options(knitr.kable.NA = '')
 
 library('rvest')
 library('readr')
 library('jsonlite')
 library('knitr')
 
-source("./Config.R")
-source("./CodeSchool.R")
-source("./TeamTreehouse.R")
-source("./Pluralsight.R")
-
-codeschool <- CodeSchool.GetUserInformation(codeschool.username)
-
-### --- DO FURTHER REFACTORING STARTING HERE ----
-
-pluralsight_details$dateCompleted <- as.Date(pluralsight_details$dateCompleted)
-pluralsight_details <- pluralsight_details[order(pluralsight_details$percentile),]
-colnames(pluralsight_details)[2] <- "Tech"
-colnames(pluralsight_details)[6] <- "IQ"
-colnames(pluralsight_details)[8] <- "Last measured"
-
-datacamp_points <- html_session(datacamp.profile) %>%
-  html_node(".profile-header__stats") %>%
-  html_node(".stats-block__number") %>%
-  html_text() %>%
-  readr::parse_number()
-
-treehouse.points_detailed <- fromJSON(treehouse.profile)
-treehouse_points <- treehouse.points_detailed$points$total
-
-codeschool_points <- html_session(codeschool.profile) %>% 
-    html_node(".bucket-content .list-item strong") %>% 
-    html_text() %>% 
-    readr::parse_number()
-
-# github project count
-# microsoft mva
-# ... certs
-punkte <- c(datacamp_points, treehouse_points, codeschool_points)
-names(punkte) <- c("DataCamp", "TeamTreehouse", "CodeSchool")
-maximalpunktzahl <- c(50696, 131540, 72)
-
-prozentangabenVektor <- punkte / maximalpunktzahl * 100 
-names(prozentangabenVektor) <- paste(names(punkte))
-prozentangabenVektor = prozentangabenVektor[order(-prozentangabenVektor)]
-
-overviewPerPortal <- as.data.frame(prozentangabenVektor)
-colnames(overviewPerPortal)[1] <- "Learning progress %"
-overviewPerPortal$`Learning progress %` <- round(overviewPerPortal$`Learning progress %`, digits = 2)
-
-overviewPerPortal <- data.frame(
-  portal = rownames(overviewPerPortal),
-  `Learning progress %` = overviewPerPortal
-)
-colnames(overviewPerPortal) <- c("portal", "Learning progress %")
-rownames(overviewPerPortal) <- NULL
+source("./Dashboard.R")
 
 ```
 
@@ -111,49 +59,8 @@ General direction:
 ## Knowledge in those technologies
 
 ```{r, echo=FALSE, warning=FALSE}
-
-overviewPerTech <- data.frame(list(
-  tech = character(),
-  certificate = character(),
-  pluralsight_score_in_percent = numeric(),
-  codeschool_progress = numeric(),
-  treehouse_progress = numeric(),
-  dataCamp_progress = numeric()
-))
-
-techinfo <- function (name, certificate, pluralsightTopics, codeschoolPercent = NA, dataCamp = NA) {
-  pluralsight_score <- NA
-  if (length(pluralsightTopics) > 0) {
-    pluralsight_score <- mean(pluralsight_details[pluralsight_details$id %in% pluralsightTopics,]$score)
-    pluralsight_score <- round(pluralsight_score / 300 * 100, 2)
-  }
-  
-  return(
-    list(
-      tech = name,
-      certificate = certificate,
-      pluralsight_score_in_percent = pluralsight_score,
-      codeschool_progress = codeschoolPercent,
-      treehouse_progress = NA,
-      dataCamp_progress = round(dataCamp, digits = 2)
-    ))
-}
-
-overviewPerTech<-rbind(overviewPerTech, techinfo("HTML, CSS, JS", "MS (70-480, 2016)", c("javascript", "jquery", "css", "html5"), codeschoolPercent = mean( c(codeschool$htmlCssPercent, codeschool$javascriptPercent))))
-overviewPerTech<-rbind(overviewPerTech, techinfo("ASP.Net", "-", c("aspnet-mvc-5")))
-
-overviewPerTech<-rbind(overviewPerTech, techinfo("C#", "-", c("c-sharp"), codeschoolPercent = codeschool$netPercent))
-
-overviewPerTech<-rbind(overviewPerTech, techinfo("MS SQL Server", "-", c(), codeschoolPercent = codeschool$databasePercent))
-
-overviewPerTech<-rbind(overviewPerTech, techinfo("Powershell", "-", c("powershell")))
-overviewPerTech<-rbind(overviewPerTech, techinfo("R", "-", c(), dataCamp = overviewPerPortal[overviewPerPortal$portal == "DataCamp",]$`Learning progress %`, codeschoolPercent =   codeschool$rPercent))
-
-overviewPerTech<-rbind(overviewPerTech, techinfo("PHP", "-", c(), codeschoolPercent = codeschool$phpPercent))
-overviewPerTech<-rbind(overviewPerTech, techinfo("MySQL", "-", c("mysql"), codeschoolPercent = codeschool$databasePercent))
-overviewPerTech<-rbind(overviewPerTech, techinfo("C++", "-", c("c-plus-plus")))
-
-kable(overviewPerTech, col.names = c("tech", "certificate", "Pluralsight score in %", "CodeSchool Progress %", "Treehouse Progress %", "DataCamp Progress %"))
+overview <- Dashboard.TechnologyKnowledgeOverview(teamTreehouseStatisticsPerTech)
+kable(overview)
 ```
 
 ## Tool Knowledge
@@ -170,12 +77,6 @@ Where is my learning progress here?
   - msbuild
   - nuget
   - PHPStorm
-
-## Progress by learning institution / portal
-
-```{r scrape, echo=FALSE, warning=FALSE}
-kable(overviewPerPortal)
-```
 
 ## Knowledge comparison with other developers by Pluralsight
 
@@ -209,43 +110,8 @@ Treehouse offers an API, using the same we get detailed points for every categor
 Although Treehouse changes its maximum points all the time, because the courses change all the time, we are able to calculate a progress using the point counts of the best students in a specific area. We get those from https://teamtreehouse.com/community/leaderboards . Note: you'll need to manually update the maximum points every 6 months, the report will remind you.
 
 ```{r Treehouse Fortschritt in %, echo=FALSE}
-treehouse.maximalePunkte.letztesUpdate <- as.Date("2018-02-03");
-if ( treehouse.maximalePunkte.letztesUpdate <= overagedDate ) {
-  print("Please visit https://teamtreehouse.com/community/leaderboards and update the maximum points per category using the points of the current leaders per category!")
-}
-treehouse.wichtigeKategorien <- c(
-  "HTML", "CSS", "Design", "JavaScript", "PHP", "WordPress", "Development.Tools",
-  "C.", "Databases", "Data.Analysis", "APIs", "Security", "Quality.Assurance")
-
-treehouse.maximalePunkte <- list(
-  HTML = 6933,
-  CSS = 11423,
-  Design = 5033,
-  JavaScript = 29958,
-  PHP = 8166,
-  WordPress = 8192,
-  Development.Tools = 4649,
-  C. = 12527, # C#
-  Databases = 5728,
-  Data.Analysis = 908,
-  APIs = 756,
-  Security = 852,
-  Quality.Assurance = 221
-)
-
-treehouse.gefiltert <- t(as.data.frame(treehouse.points_detailed$points))
-treehouse.gefiltert <- subset(treehouse.gefiltert, row.names(treehouse.gefiltert) %in% treehouse.wichtigeKategorien)
-
-treehouse.gefiltert <- cbind(treehouse.gefiltert, treehouse.maximalePunkte)
-treehouse.gefiltert <- cbind(treehouse.gefiltert, round(unlist(treehouse.gefiltert[,1]) / unlist(treehouse.gefiltert[,2]) * 100, digits = 2))
-
-colnames(treehouse.gefiltert)[1] <- "My Points"
-colnames(treehouse.gefiltert)[2] <- "Max. Points"
-colnames(treehouse.gefiltert)[3] <- "Progress %"
-
-rownames(treehouse.gefiltert)[which(rownames(treehouse.gefiltert) == "C.")] <- "C#"
-
-kable(treehouse.gefiltert, align=c(rep('r',times=3)))
+treehouseStatsPerTech <- TeamTreehouse.GetStatisticsPerTech(treehouse.points_detailed, overagedDate)
+kable(treehouseStatsPerTech, align=c(rep('r',times=3)))
 ```
 
 Last update of the maximum points has been on **`r format(treehouse.maximalePunkte.letztesUpdate, format="%Y-%m-%d")` ** .
@@ -258,12 +124,4 @@ Diese Lernportale werden in diesem Überblick verwendet:
   - TeamTreehouse (https://teamtreehouse.com, Videotraining, Programmieraufgaben, GitHub-Projekte & Prüfung durch die Trainer, sowie gegenseitige Code-Reviews der Schüler)
   - CodeSchool (https://codeschool.com), Video & Programmieraufgaben
   - Pluralsight (https://pluralsight.com, Videoschulungen, i.d.R. von führenden Entwicklern oder MVPs der entsprechenden Technologien), sehr gute Videoschulungen und Kenntis-Assessments, aber keine Programmieraufgaben
-  - **todo** Microsoft Virtual Academy 
-  - **todo** Microsoft Profil (Zertifikate etc.)
-  - **todo** https://www.edx.org (Free online courses from the world's best universities)
-  - **todo** github-Projekte, Beteiligungen an Open Source
-  - **todo** https://www.coursera.org/
-  - **todo** https://www.tiobe.com/tiobe-index/ Positionierung des Tech-Stacks innerhalb der generellen Popularität der Programmiersprachen
-  - **todo** Einschätzung des Lernfortschrittes von Pluralsight anhand der mögl. interessanten zu gesehenen Videoschulungen
-  - **todo** Automatische Aktualisierung der Liste der Zertifikate sowie eine Liste der angestrebten Zertifikate
 

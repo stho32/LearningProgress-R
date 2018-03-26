@@ -12,8 +12,19 @@ library('httr')
 
 source("./Config.R")
 
-# alt, wegwerfen sobald möglich
-pluralsight_details <- fromJSON("https://app.pluralsight.com/profile/data/skillmeasurements/f68703d3-cf25-4d49-96ae-ef5f005e9d7e")
+ 
+# This function grabs statistics 
+Pluralsight.GetStatisticsFrom <- function(url) {
+  result <- fromJSON(url)
+  result$dateCompleted <- as.Date(result$dateCompleted)
+  result <- result[order(result$percentile),]
+  colnames(result)[2] <- "Tech"
+  colnames(result)[6] <- "IQ"
+  colnames(result)[8] <- "Last measured"
+  return(result)
+}
 
 # neu :)
-pluralsight.SkillMeasurements <- fromJSON(pluralsight.skillmeasurementsUrl)
+Pluralsight.Statistics <- Pluralsight.GetStatisticsFrom(pluralsight.skillmeasurementsUrl)
+# alt, wegwerfen sobald möglich
+pluralsight_details    <- Pluralsight.GetStatisticsFrom(pluralsight.skillmeasurementsUrl)

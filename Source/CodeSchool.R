@@ -61,22 +61,23 @@ CodeSchool.GetUserInformation <- function (username) {
   
   codeschool = list()
   
-  codeschool$htmlCssPercent    <-
-    codeschool.getPathPercentComplete("https://www.codeschool.com/learn/html-css")
-  codeschool$javascriptPercent <-
-    codeschool.getPathPercentComplete("https://www.codeschool.com/learn/javascript")
-  codeschool$gitPercent        <-
-    codeschool.getPathPercentComplete("https://www.codeschool.com/learn/git")
-  codeschool$netPercent        <-
-    codeschool.getPathPercentComplete("https://www.codeschool.com/learn/net")
-  codeschool$phpPercent        <-
-    codeschool.getPathPercentComplete("https://www.codeschool.com/learn/php")
-  codeschool$databasePercent   <-
-    codeschool.getPathPercentComplete("https://www.codeschool.com/learn/database")
-  codeschool$rPercent          <-
-    codeschool.getCoursesCompletePercent(c("/courses/try-r"))
+  codeschool$htmlCssPercent    <- codeschool.getPathPercentComplete("https://www.codeschool.com/learn/html-css")
+  codeschool$javascriptPercent <- codeschool.getPathPercentComplete("https://www.codeschool.com/learn/javascript")
+  codeschool$gitPercent        <- codeschool.getPathPercentComplete("https://www.codeschool.com/learn/git")
+  codeschool$netPercent        <- codeschool.getPathPercentComplete("https://www.codeschool.com/learn/net")
+  codeschool$phpPercent        <- codeschool.getPathPercentComplete("https://www.codeschool.com/learn/php")
+  codeschool$databasePercent   <- codeschool.getPathPercentComplete("https://www.codeschool.com/learn/database")
+  codeschool$rPercent          <- codeschool.getCoursesCompletePercent(c("/courses/try-r"))
   
   return(codeschool)
+}
+
+CodeSchool.GetPoints <- function(url) {
+  result <- html_session(url) %>% 
+    html_node(".bucket-content .list-item strong") %>% 
+    html_text() %>% 
+    readr::parse_number()
+  return(result)
 }
 
 #codeschool <- CodeSchool.GetUserInformation("stho")

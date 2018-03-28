@@ -3,6 +3,7 @@
 #
 # Get the latest changes to this repository
 #
+cd /home/shoff/Projekte/LearningProgress-R
 git pull
 
 #

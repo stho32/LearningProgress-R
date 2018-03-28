@@ -5,6 +5,12 @@
 # add your profile information as needed.
 #
 
+# Some critical R options... 
+options(scipen=999)
+options(stringsAsFactors=FALSE)
+options(knitr.kable.NA = '')
+#
+
 datacamp.profile <- "https://www.datacamp.com/profile/sthoffmann";
 treehouse.profile <- "https://teamtreehouse.com/stefanhoffmann.json";
 
@@ -15,3 +21,5 @@ pluralsight.skillmeasurementsUrl = "https://app.pluralsight.com/profile/data/ski
 
 # Skill measurements taken older than this need renewal
 overagedDate <- Sys.Date() - 30*6
+
+#certificates <- read.csv()

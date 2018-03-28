@@ -1,6 +1,11 @@
 #!/bin/bash
 
 #
+# Get the latest changes to this repository
+#
+git pull
+
+#
 # Generate a new report
 #
 cd Source

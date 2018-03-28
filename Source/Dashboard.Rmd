@@ -16,11 +16,33 @@ library('knitr')
 
 source("./Dashboard.R")
 
+overview <- Dashboard.TechnologyKnowledgeOverview(teamTreehouseStatisticsPerTech)
+totalMastery <- Dashboard.TotalMasteryPercentage(overview);
+pluralsightAverage <- round(Dashboard.PluralsightAverage(overview), digits = 2);
+pluralsightKnowledgeByCategory <- Dashboard.PluralsightAverageByCategory(overview);
 ```
 
 This report as been last updated at **`r format(Sys.time(), format="%Y-%m-%d %H:%M")`**.
 
-## Tech Stack
+## Mastery of technologies in my tech stack
+
+<div style="text-align:center; font-size: 18pt; background-color:yellow">
+  `r totalMastery`% Total Mastery Overall<br/>
+</div>
+<div style="text-align:center; font-size: 14pt; background-color:lightyellow">
+  `r pluralsightAverage`% Avg. Knowledge by Pluralsight score (KBP)<br/>
+  KBP by tech category: <br/>
+  **A:** `r pluralsightKnowledgeByCategory$A` %
+  **A/B:** `r pluralsightKnowledgeByCategory$AB` %
+  **B:** `r pluralsightKnowledgeByCategory$B` %
+  **C:** `r pluralsightKnowledgeByCategory$C` %
+</div>
+
+```{r, echo=FALSE, warning=FALSE}
+kable(overview)
+```
+
+### Explanation of the tech stack
 
 Target of my tech stack is the development of lasting and enduring web based business applications.
 
@@ -56,12 +78,6 @@ General direction:
 
 - **C++ (C)**, for the seldom moments where I have a need to talk directly to the system or performance is so important that everything else does not count.
 
-## Knowledge in those technologies
-
-```{r, echo=FALSE, warning=FALSE}
-overview <- Dashboard.TechnologyKnowledgeOverview(teamTreehouseStatisticsPerTech)
-kable(overview)
-```
 
 ## Tool Knowledge
 

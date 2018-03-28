@@ -127,6 +127,43 @@ Dashboard.TechnologyKnowledgeOverview <- function(treehouseStatisticsPerTech) {
   return(overviewPerTech) 
 }
 
+#
+# Pluralsight score average
+# 
+Dashboard.PluralsightAverage <- function (overviewPerTech) {
+  return (mean(overviewPerTech$`Pluralsight score in %`, na.rm=TRUE))
+}
+
+#
+# Pluralsight knowledge by tech category (A, A/B, B, C)
+#
+Dashboard.PluralsightAverageByCategory <- function (overviewPerTech) {
+  result <- list()
+  
+  result$A  <- round(Dashboard.PluralsightAverage(overviewPerTech[which(overviewPerTech$tech %in% c("HTML, CSS, JS", "ASP.Net", "C#", "MS SQL Server")),]), digits = 2)
+  result$AB <- round(Dashboard.PluralsightAverage(overviewPerTech[which(overviewPerTech$tech %in% c("Powershell", "R")),]), digits = 2)
+  result$B  <- round(Dashboard.PluralsightAverage(overviewPerTech[which(overviewPerTech$tech %in% c("PHP", "MySQL")),]), digits = 2)
+  result$C  <- round(Dashboard.PluralsightAverage(overviewPerTech[which(overviewPerTech$tech %in% c("C++")),]), digits = 2)
+  
+  return (result)
+}
+
+# The total mastery percentage is the average of all shown percentages
+# in the overview per tech datatable, excluding values that are NA
+Dashboard.TotalMasteryPercentage <- function(overviewPerTech) {
+  
+  pluralsightAverage <- Dashboard.PluralsightAverage(overviewPerTech)
+  codeschoolAverage <- mean(overviewPerTech$`CodeSchool Progress %`, na.rm=TRUE)
+  treehouseAverage <- mean(overviewPerTech$`Treehouse Progress %`, na.rm=TRUE)
+  datacampAverage <- mean(overviewPerTech$`DataCamp Progress %`, na.rm=TRUE)
+  
+  totalAverage <- mean(c(pluralsightAverage, codeschoolAverage, treehouseAverage, datacampAverage))
+  totalAverage <- round(totalAverage, digits = 2)
+  
+  return (totalAverage)
+  
+}
+
 
 #overview <- Dashboard.TechnologyKnowledgeOverview(teamTreehouseStatisticsPerTech)
 

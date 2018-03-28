@@ -14,6 +14,7 @@ cp -f Source/Dashboard.html ../Overview/docs/Learning-Dashboard.html
 now=$(date +"%Y-%m-%d")
 cp -f Source/Dashboard.html ../Overview/docs/Learning-Dashboard-$now.html
 cd ../Overview
+git pull
 git add .
 git commit -m "Update for Learning Dashboard"
 git push

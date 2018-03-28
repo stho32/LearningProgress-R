@@ -18,7 +18,7 @@ source("./Dashboard.R")
 
 ```
 
-This report as been last updated at **`r format(Sys.time(), format="%Y-%m-%d %H:%m")`**.
+This report as been last updated at **`r format(Sys.time(), format="%Y-%m-%d %H:%M")`**.
 
 ## Tech Stack
 

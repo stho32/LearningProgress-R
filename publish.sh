@@ -10,6 +10,7 @@ git pull
 # Generate a new report
 #
 cd Source
+rm Dashboard.html
 Rscript -e "rmarkdown::render('./Dashboard.Rmd', output_file='/home/shoff/Projekte/LearningProgress-R/Source/Dashboard.html')"
 cd ..
 

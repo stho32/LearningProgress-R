@@ -19,6 +19,9 @@ codeschool.profile <- paste("https://www.codeschool.com/users/", codeschool.user
 
 pluralsight.skillmeasurementsUrl = "https://app.pluralsight.com/profile/data/skillmeasurements/f68703d3-cf25-4d49-96ae-ef5f005e9d7e";
 
+# List the path-ids for tool paths you like here
+pluralsight.pathsForTools = c("docker")
+
 # Skill measurements taken older than this need renewal
 overagedDate <- Sys.Date() - 30*6
 

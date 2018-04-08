@@ -9,6 +9,7 @@ source("./CodeSchool.R")
 source("./TeamTreehouse.R")
 source("./Pluralsight.R")
 source("./DataCamp.R")
+source("./Mark.R")
 
 # Grab all stats that you can find
 
@@ -59,6 +60,7 @@ Dashboard.TechnologyKnowledgeOverview <- function(treehouseStatisticsPerTech) {
   overviewPerTech <- data.frame(list(
     tech = character(),
     pluralsight_score_in_percent = numeric(),
+    mark = numeric(),
     codeschool_progress = numeric(),
     treehouse_progress = numeric(),
     dataCamp_progress = numeric(),
@@ -70,12 +72,14 @@ Dashboard.TechnologyKnowledgeOverview <- function(treehouseStatisticsPerTech) {
   techinfo <- function (name, certificate, pluralsightTopics, codeschoolPercent = NA, dataCamp = NA,
                         teamTreehouseTopics = NULL) {
     pluralsight_score <- NA
+    pluralsight_mark  <- NA
     
     # in case pluralsight topics are given, we collect the points of all named topics
     # and calculate an average
     if (length(pluralsightTopics) > 0) {
       pluralsight_score <- mean(pluralsight_details[pluralsight_details$id %in% pluralsightTopics,]$score)
       pluralsight_score <- round(pluralsight_score / 300 * 100, 2)
+      pluralsight_mark  <- MarkR.AsMark(pluralsight_score)
     }
     
     treehouseProgress <- NA
@@ -90,6 +94,7 @@ Dashboard.TechnologyKnowledgeOverview <- function(treehouseStatisticsPerTech) {
       list(
         tech = name,
         pluralsight_score_in_percent = pluralsight_score,
+        mark = pluralsight_mark,
         codeschool_progress = codeschoolPercent,
         treehouse_progress = treehouseProgress,
         dataCamp_progress = round(dataCamp, digits = 2),
@@ -122,7 +127,7 @@ Dashboard.TechnologyKnowledgeOverview <- function(treehouseStatisticsPerTech) {
                          teamTreehouseTopics = c("Databases")))
   overviewPerTech<-rbind(overviewPerTech, techinfo("C++", "-", c("c-plus-plus")))
   
-  colnames(overviewPerTech) <- c("tech", "Pluralsight score in %", "CodeSchool Progress %", "Treehouse Progress %", "DataCamp Progress %", "certificate")
+  colnames(overviewPerTech) <- c("tech", "Pluralsight score in %", "equals mark", "CodeSchool Progress %", "Treehouse Progress %", "DataCamp Progress %", "certificate")
   
   return(overviewPerTech) 
 }
@@ -171,6 +176,7 @@ Dashboard.ToolOverview <- function() {
   pluralsight.pathsForTools = c("docker")
   toolKnowledge <- Pluralsight.Statistics[Pluralsight.Statistics$id %in% pluralsight.pathsForTools,]
   toolKnowledge$ScoreInPercent <- round( toolKnowledge$score / 300 * 100, digits = 2 )
+  toolKnowledge$mark <- MarkR.AsMark(toolKnowledge$ScoreInPercent)
   toolKnowledge$url <- NULL
   toolKnowledge$thumbnailUrl <- NULL
   toolKnowledge$id <- NULL

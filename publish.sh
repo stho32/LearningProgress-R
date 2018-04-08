@@ -5,6 +5,9 @@
 #
 cd /home/shoff/Projekte/LearningProgress-R
 git pull
+cd ../Overview
+git pull
+cd ../LearningProgress-R
 
 #
 # Generate a new report

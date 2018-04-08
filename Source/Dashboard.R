@@ -164,6 +164,18 @@ Dashboard.TotalMasteryPercentage <- function(overviewPerTech) {
   
 }
 
+# Collect statistics for tool knowledge 
+# Actually this is a list of all paths with ids contained in the 
+# configuration pluralsight.pathsForTools variable.
+Dashboard.ToolOverview <- function() {
+  pluralsight.pathsForTools = c("docker")
+  toolKnowledge <- Pluralsight.Statistics[Pluralsight.Statistics$id %in% pluralsight.pathsForTools,]
+  toolKnowledge$ScoreInPercent <- round( toolKnowledge$score / 300 * 100, digits = 2 )
+  toolKnowledge$url <- NULL
+  toolKnowledge$thumbnailUrl <- NULL
+  toolKnowledge$id <- NULL
+  return (toolKnowledge)
+}
 
 #overview <- Dashboard.TechnologyKnowledgeOverview(teamTreehouseStatisticsPerTech)
 

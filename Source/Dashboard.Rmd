@@ -83,8 +83,13 @@ General direction:
 
 I use certain tools to accomplish my goals.
 Git e.g.
-Where is my learning progress here?
+Where is my learning progress here? (Using pluralsight)
 
+```{r tool knowledge, echo=FALSE}
+kable(Dashboard.ToolOverview())
+```
+
+### Tools that are still missing in that list
   - Git
   - Visual Studio 
   - Rider

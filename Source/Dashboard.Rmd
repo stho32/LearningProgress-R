@@ -89,7 +89,16 @@ Where is my learning progress here? (Using pluralsight)
 kable(Dashboard.ToolOverview())
 ```
 
+  - IIS 8 
+     - [ ] [Fundamentals](https://app.pluralsight.com/library/courses/iis-administration-fundamentals/table-of-contents) 
+     - [ ] [Advanced](https://app.pluralsight.com/library/courses/iis-administration-in-depth/table-of-contents) 
+     - [x] [For Devs](https://app.pluralsight.com/library/courses/iis-for-developers/table-of-contents)
+  - Wordpress
+     - [ ] [TeamTreehouse Wordpress Track](https://teamtreehouse.com/tracks/development-for-wordpress)
+     - [ ] [Pluralsight Courses](https://app.pluralsight.com/library/search?q=Wordpress)
+
 ### Tools that are still missing in that list
+
   - Git
   - Visual Studio 
   - Rider

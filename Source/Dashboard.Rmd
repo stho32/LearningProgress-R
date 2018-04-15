@@ -96,6 +96,7 @@ kable(Dashboard.ToolOverview())
   - Wordpress
      - [ ] [TeamTreehouse Wordpress Track](https://teamtreehouse.com/tracks/development-for-wordpress)
      - [ ] [Pluralsight Courses](https://app.pluralsight.com/library/search?q=Wordpress)
+  - Windows Server 2012 / 2016
 
 ### Tools that are still missing in that list
 
